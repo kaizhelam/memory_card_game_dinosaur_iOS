@@ -7,8 +7,6 @@
 
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
-
-import 'package:memory_card_game_dinosaur/main.dart';
 import 'package:memory_card_game_dinosaur/screen/my_app.dart';
 
 void main() {
