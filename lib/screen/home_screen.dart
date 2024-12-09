@@ -1,5 +1,6 @@
 import 'dart:async';
 import 'package:flutter/material.dart';
+import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:intl/intl.dart';
 import 'dart:math';
@@ -78,8 +79,16 @@ class _HomeScreenState extends State<HomeScreen>
       barrierDismissible: false,
       builder: (BuildContext context) {
         return AlertDialog(
-          title: TextWidget(text: titleMessage, color: Colors.black, fontsize: 28, fontweight: true),
-          content: TextWidget(text: message, color: Colors.black, fontsize: 23, fontweight: false),
+          title: TextWidget(
+              text: titleMessage,
+              color: Colors.black,
+              fontsize: 28.sp,
+              fontweight: true),
+          content: TextWidget(
+              text: message,
+              color: Colors.black,
+              fontsize: 23.sp,
+              fontweight: false),
           actions: [
             ElevatedButton(
               style: ElevatedButton.styleFrom(
@@ -100,7 +109,7 @@ class _HomeScreenState extends State<HomeScreen>
               child: Text(
                 "Restart",
                 style: GoogleFonts.fredoka(
-                  fontSize: 20,
+                  fontSize: 20.sp,
                   fontWeight: FontWeight.bold,
                   color: Colors.white,
                 ),
@@ -206,30 +215,30 @@ class _HomeScreenState extends State<HomeScreen>
           title: Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              const TextWidget(
+               TextWidget(
                   text: "Game History",
                   color: Colors.black,
-                  fontsize: 28,
+                  fontsize: 28.sp,
                   fontweight: true),
               IconButton(
-                icon: const Icon(Icons.delete_forever, color: Colors.red),
+                icon: const Icon(Icons.delete_forever, color: Colors.red, size: 40,),
                 onPressed: () async {
                   bool? confirm = await showDialog(
                     context: context,
                     builder: (context) {
-                      return const AlertDialog(
+                      return  AlertDialog(
                         title: TextWidget(
                             text: "Clear History",
                             color: Colors.black,
-                            fontsize: 28,
+                            fontsize: 28.sp,
                             fontweight: true),
                         content: TextWidget(
                             text:
                                 "Are you sure you want to remove all game history?",
                             color: Colors.black,
-                            fontsize: 17,
+                            fontsize: 17.sp,
                             fontweight: false),
-                        actions: [
+                        actions: const [
                           CustomButtonWidget(text: "Close", onRemove: false),
                           CustomButtonWidget(text: "Confirm", onRemove: true)
                         ],
@@ -239,9 +248,8 @@ class _HomeScreenState extends State<HomeScreen>
 
                   if (confirm == true) {
                     final prefs = await SharedPreferences.getInstance();
-                    await prefs.remove(
-                        'gameHistory'); // Clear game history from storage
-                    Navigator.of(context).pop(); // Close the dialog
+                    await prefs.remove('gameHistory');
+                    Navigator.of(context).pop();
                   }
                 },
               ),
@@ -249,11 +257,11 @@ class _HomeScreenState extends State<HomeScreen>
           ),
           content: SingleChildScrollView(
             child: Container(
-                width: double.maxFinite, // Ensures the content doesn't overflow
+                width: double.maxFinite,
                 child: TextWidget(
                     text: allGameRecords,
                     color: Colors.black,
-                    fontsize: 17,
+                    fontsize: 15.sp,
                     fontweight: false)),
           ),
           actions: const [
@@ -277,21 +285,21 @@ class _HomeScreenState extends State<HomeScreen>
                 image: AssetImage("assets/images/bg.png"), fit: BoxFit.cover),
           ),
         ),
-        const Align(
+        Align(
           alignment: Alignment.topCenter,
-          child: Padding(
-            padding: EdgeInsets.only(top: 120),
-            child: TextWidget(
-                text: "Dino Farm Memory Rush",
-                color: Color(0xFF6d3e00),
-                fontsize: 35,
-                fontweight: true),
+            child: Padding(
+              padding:  EdgeInsets.only(top:120.h),
+              child: TextWidget(
+                  text: "Dino Memory Quest",
+                  color: const Color(0xFF6d3e00),
+                  fontsize: 35.sp,
+                  fontweight: true),
+            ),
           ),
-        ),
         Positioned(
-            top: 185,
-            right: 28,
-            left: 28,
+            top: 185.h,
+            right: 28.w,
+            left: 28.w,
             child: Column(
               children: [
                 Row(
@@ -299,14 +307,14 @@ class _HomeScreenState extends State<HomeScreen>
                   children: [
                     TextWidget(
                       text: "Score $score",
-                      color: Color(0xFF6d3e00),
-                      fontsize: 32,
+                      color: const Color(0xFF6d3e00),
+                      fontsize: 30.sp,
                       fontweight: true,
                     ),
                     TextWidget(
                       text: "Time $timeLeft",
                       color: const Color(0xFF6d3e00),
-                      fontsize: 32,
+                      fontsize: 30.sp,
                       fontweight: true,
                     )
                   ],
@@ -335,7 +343,7 @@ class _HomeScreenState extends State<HomeScreen>
         Positioned.fill(
           child: Center(
             child: Padding(
-              padding: EdgeInsets.only(top: 120, right: MediaQuery.of(context).size.width > 800 ? 150 : 0, left: MediaQuery.of(context).size.width > 800 ? 150 : 0),
+              padding: EdgeInsets.only(top: MediaQuery.of(context).size.width > 800 ? 380 : 120, right: MediaQuery.of(context).size.width > 800 ? 150 : 0, left: MediaQuery.of(context).size.width > 800 ? 150 : 0),
               child: AnimatedBuilder(
                 animation: _shakeController,
                 builder: (context, child) {
@@ -359,8 +367,8 @@ class _HomeScreenState extends State<HomeScreen>
                         }
                       },
                       child: SizedBox(
-                        width: MediaQuery.of(context).size.width > 800 ? 150 : 110,
-                        height: MediaQuery.of(context).size.width > 800 ? 150 : 110,
+                        width: MediaQuery.of(context).size.width > 800 ? 80.w : 110.w,
+                        height: MediaQuery.of(context).size.width > 800 ? 80.w : 110.w,
                         child: AnimatedSwitcher(
                           duration: const Duration(milliseconds: 500),
                           transitionBuilder: (child, animation) {
@@ -412,18 +420,38 @@ class _HomeScreenState extends State<HomeScreen>
             ),
           ),
         ),
-        Positioned(
-          bottom: 30,
-          left: 20,
-          child: FloatingActionButton(
-            onPressed: () {
-              _loadGameHistory();
-            },
-            backgroundColor: const Color(0xFF6d3e00),
-            child: const Icon(
-              Icons.history,
-              size: 30,
-              color: Colors.white,
+        Align(
+          alignment: Alignment.bottomCenter,
+          child: Padding(
+            padding: const EdgeInsets.all(24),
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                FloatingActionButton(
+                  onPressed: () {
+                    _loadGameHistory();
+                  },
+                  backgroundColor: const Color(0xFF6d3e00),
+                  child: const Icon(
+                    Icons.history,
+                    size: 40,
+                    color: Colors.white,
+                  ),
+                ),
+                ElevatedButton(
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: const Color(0xFF6d3e00),
+                  ),
+                  onPressed: () {
+                    Navigator.pop(context);
+                  },
+                  child: const Icon(
+                    Icons.exit_to_app,
+                    size: 40,
+                    color: Colors.white,
+                  ),
+                )
+              ],
             ),
           ),
         ),
