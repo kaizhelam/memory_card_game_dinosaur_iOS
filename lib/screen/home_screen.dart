@@ -215,18 +215,22 @@ class _HomeScreenState extends State<HomeScreen>
           title: Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-               TextWidget(
+              TextWidget(
                   text: "Game History",
                   color: Colors.black,
                   fontsize: 28.sp,
                   fontweight: true),
               IconButton(
-                icon: const Icon(Icons.delete_forever, color: Colors.red, size: 40,),
+                icon: const Icon(
+                  Icons.delete_forever,
+                  color: Colors.red,
+                  size: 40,
+                ),
                 onPressed: () async {
                   bool? confirm = await showDialog(
                     context: context,
                     builder: (context) {
-                      return  AlertDialog(
+                      return AlertDialog(
                         title: TextWidget(
                             text: "Clear History",
                             color: Colors.black,
@@ -287,15 +291,15 @@ class _HomeScreenState extends State<HomeScreen>
         ),
         Align(
           alignment: Alignment.topCenter,
-            child: Padding(
-              padding:  EdgeInsets.only(top:120.h),
-              child: TextWidget(
-                  text: "Dino Memory Quest",
-                  color: const Color(0xFF6d3e00),
-                  fontsize: 35.sp,
-                  fontweight: true),
-            ),
+          child: Padding(
+            padding: EdgeInsets.only(top: 120.h),
+            child: TextWidget(
+                text: "Dino Memory Quest",
+                color: const Color(0xFF6d3e00),
+                fontsize: 35.sp,
+                fontweight: true),
           ),
+        ),
         Positioned(
             top: 185.h,
             right: 28.w,
@@ -343,7 +347,10 @@ class _HomeScreenState extends State<HomeScreen>
         Positioned.fill(
           child: Center(
             child: Padding(
-              padding: EdgeInsets.only(top: MediaQuery.of(context).size.width > 800 ? 380 : 120, right: MediaQuery.of(context).size.width > 800 ? 150 : 0, left: MediaQuery.of(context).size.width > 800 ? 150 : 0),
+              padding: EdgeInsets.only(
+                  top: MediaQuery.of(context).size.width > 800 ? 380 : 120,
+                  right: MediaQuery.of(context).size.width > 800 ? 150 : 0,
+                  left: MediaQuery.of(context).size.width > 800 ? 150 : 0),
               child: AnimatedBuilder(
                 animation: _shakeController,
                 builder: (context, child) {
@@ -367,8 +374,12 @@ class _HomeScreenState extends State<HomeScreen>
                         }
                       },
                       child: SizedBox(
-                        width: MediaQuery.of(context).size.width > 800 ? 80.w : 110.w,
-                        height: MediaQuery.of(context).size.width > 800 ? 80.w : 110.w,
+                        width: MediaQuery.of(context).size.width > 800
+                            ? 80.w
+                            : 110.w,
+                        height: MediaQuery.of(context).size.width > 800
+                            ? 80.w
+                            : 110.w,
                         child: AnimatedSwitcher(
                           duration: const Duration(milliseconds: 500),
                           transitionBuilder: (child, animation) {
