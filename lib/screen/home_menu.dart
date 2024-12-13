@@ -208,9 +208,10 @@ class _HomeMenuState extends State<HomeMenu> {
     return Card(
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.circular(20),
+        side: const BorderSide(color: Colors.white, width: 2),
       ),
       elevation: 5,
-      color: const Color(0xFF6d3e00).withOpacity(1),
+      color: const Color(0xFF6d3e00).withOpacity(0.9),
       child: Padding(
         padding: EdgeInsets.all(15.w),
         child: Column(
@@ -251,7 +252,8 @@ class CustomIconWidget extends StatelessWidget {
   final double size;
   final Color color;
 
-  const CustomIconWidget({super.key, 
+  const CustomIconWidget({
+    super.key,
     required this.icon,
     this.size = 30.0,
     this.color = Colors.white,
