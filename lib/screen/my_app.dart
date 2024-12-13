@@ -1,12 +1,9 @@
-import 'dart:async';
-import 'dart:convert';
-
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
-import 'package:http/http.dart' as http;
 import 'package:memory_card_game_dinosaur/screen/home_info.dart';
 import 'package:memory_card_game_dinosaur/screen/home_menu.dart';
+import 'package:memory_card_game_dinosaur/services/api_service.dart';
 
 class MyApp extends StatefulWidget {
   const MyApp({super.key});
@@ -19,6 +16,7 @@ class MyApp extends StatefulWidget {
 
 class _MyAppState extends State<MyApp> {
   String? url;
+  final ApiService _apiService = ApiService();
 
   @override
   void initState() {
@@ -26,61 +24,32 @@ class _MyAppState extends State<MyApp> {
     SystemChrome.setPreferredOrientations(
         [DeviceOrientation.portraitUp, DeviceOrientation.portraitDown]);
 
-    fetchIsOn();
+    fetchData();
   }
 
   @override
   void dispose() {
-    // Unlock orientation when leaving this screen
     SystemChrome.setPreferredOrientations(DeviceOrientation.values);
     super.dispose();
   }
 
-  Future<void> fetchIsOn() async {
-    try {
-      final response = await http.get(
-        Uri.parse(
-            'https://6703907dab8a8f892730a6d2.mockapi.io/api/v1/memorycardgame'),
-      );
+  Future<void> fetchData() async {
+    final data = await _apiService.fetchIsOn();
 
-      if (response.statusCode == 200) {
-        final List<dynamic> data = jsonDecode(response.body);
-        if (data.isNotEmpty) {
-          final bool isOn = data[0]['is_on'] ?? false;
-          final String urlLink = data[0]['url'] ?? '';
+    if (data != null) {
+      final bool isOn = data['is_on'] ?? false;
+      final String urlLink = data['url'] ?? '';
 
-          if (isOn && await isValidUrl(urlLink)) {
-            url = urlLink;
-          } else {
-            url = "";
-          }
-        }
+      if (isOn && await _apiService.isValidUrl(urlLink)) {
+        url = urlLink;
       } else {
         url = "";
       }
-    } catch (e) {
+    } else {
       url = "";
     }
 
     setState(() {});
-  }
-
-  Future<bool> isValidUrl(String url) async {
-    try {
-      final uri = Uri.tryParse(url);
-      if (uri == null || !['http', 'https'].contains(uri.scheme)) {
-        return false;
-      }
-
-      final response = await http.get(uri);
-      return response.statusCode == 200;
-    } on TimeoutException {
-      return false;
-    } on Exception {
-      return false;
-    } catch (e) {
-      return false;
-    }
   }
 
   @override

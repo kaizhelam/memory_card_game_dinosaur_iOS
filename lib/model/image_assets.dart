@@ -8,5 +8,5 @@ class ImageAssets {
     'assets/images/card6.png',
   ];
 
-  static const String questionMarkImage = "assets/images/questionimage.png";
+  static const String questionMarkImage = "assets/images/defaultimage.png";
 }

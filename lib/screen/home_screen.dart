@@ -6,12 +6,18 @@ import 'package:intl/intl.dart';
 import 'dart:math';
 
 import 'package:memory_card_game_dinosaur/model/image_assets.dart';
+import 'package:memory_card_game_dinosaur/utils/exit_game_dialog.dart';
+import 'package:memory_card_game_dinosaur/widget/background_widget.dart';
 import 'package:memory_card_game_dinosaur/widget/button_widget.dart';
+import 'package:memory_card_game_dinosaur/widget/expanded_widget.dart';
+import 'package:memory_card_game_dinosaur/widget/scoreprogressindicator_widget.dart';
 import 'package:memory_card_game_dinosaur/widget/text_widget.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 class HomeScreen extends StatefulWidget {
-  const HomeScreen({super.key});
+  const HomeScreen({super.key, required this.gameMode});
+
+  final String gameMode;
 
   @override
   State<HomeScreen> createState() => _HomeScreenState();
@@ -28,10 +34,16 @@ class _HomeScreenState extends State<HomeScreen>
   late Timer _timeValue;
   late AnimationController _shakeController;
   double progress = 0.0;
+  int totalTime = 60;
 
   @override
   void initState() {
     super.initState();
+    if (widget.gameMode == "Easy") {
+      totalTime = 60;
+    } else if (widget.gameMode == "Hard") {
+      totalTime = 40;
+    }
     _shakeController = AnimationController(
       vsync: this,
       duration: const Duration(seconds: 3),
@@ -56,7 +68,7 @@ class _HomeScreenState extends State<HomeScreen>
   }
 
   void _countDownTimer() {
-    timeLeft = 60;
+    timeLeft = totalTime;
     _timeValue = Timer.periodic(
       const Duration(seconds: 1),
       (timer) {
@@ -66,7 +78,7 @@ class _HomeScreenState extends State<HomeScreen>
           } else {
             _timeValue.cancel();
             _saveGameHistory();
-            _messageDialog("Time's Up!", "Better luck next time");
+            _messageDialog("Game Lose!", "Good Luck Next Time");
           }
         });
       },
@@ -131,21 +143,23 @@ class _HomeScreenState extends State<HomeScreen>
 
     if (flippedIndexes.length == 2) {
       isProcessing = true;
+
       if (duplicatedImages[flippedIndexes[0]] ==
           duplicatedImages[flippedIndexes[1]]) {
-        setState(() {
-          score += 10;
-        });
-        Future.delayed(const Duration(milliseconds: 300), () {
+        Future.delayed(const Duration(milliseconds: 800), () {
           setState(() {
+            duplicatedImages[flippedIndexes[0]] = "";
+            duplicatedImages[flippedIndexes[1]] = "";
             flippedIndexes.clear();
+            score += 5;
             isProcessing = false;
             _updateProgress();
+
             if (_checkCardMatched()) {
               _saveGameHistory();
               _shakeController.forward().then((_) {
                 _shakeController.reset();
-                _messageDialog("You Won!", "you did a great job");
+                _messageDialog("Game Win!", "you matched all the card!!!");
                 _timeValue.cancel();
               });
             }
@@ -190,7 +204,7 @@ class _HomeScreenState extends State<HomeScreen>
       message = "Game Over";
     }
     List<String> gameHistory = prefs.getStringList('gameHistory') ?? [];
-    gameHistory.add('DateTime: $currentDateTime, Score: $score, $message');
+    gameHistory.add('TimePlay: $currentDateTime, Game Score: $score, $message');
     await prefs.setStringList('gameHistory', gameHistory);
   }
 
@@ -202,7 +216,7 @@ class _HomeScreenState extends State<HomeScreen>
       String allGameRecords = gameHistory.join('\n');
       _showHistoryDialog(allGameRecords);
     } else {
-      print("No game history found.");
+      return;
     }
   }
 
@@ -253,6 +267,7 @@ class _HomeScreenState extends State<HomeScreen>
                   if (confirm == true) {
                     final prefs = await SharedPreferences.getInstance();
                     await prefs.remove('gameHistory');
+                    // ignore: use_build_context_synchronously
                     Navigator.of(context).pop();
                   }
                 },
@@ -260,6 +275,7 @@ class _HomeScreenState extends State<HomeScreen>
             ],
           ),
           content: SingleChildScrollView(
+            // ignore: sized_box_for_whitespace
             child: Container(
                 width: double.maxFinite,
                 child: TextWidget(
@@ -282,191 +298,168 @@ class _HomeScreenState extends State<HomeScreen>
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      body: Stack(children: [
-        Container(
-          decoration: const BoxDecoration(
-            image: DecorationImage(
-                image: AssetImage("assets/images/bg.png"), fit: BoxFit.cover),
-          ),
-        ),
-        Align(
-          alignment: Alignment.topCenter,
-          child: Padding(
-            padding: EdgeInsets.only(top: 120.h),
-            child: TextWidget(
-                text: "Dino Memory Quest",
-                color: const Color(0xFF6d3e00),
-                fontsize: 35.sp,
-                fontweight: true),
-          ),
-        ),
-        Positioned(
-            top: 185.h,
-            right: 28.w,
-            left: 28.w,
-            child: Column(
-              children: [
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [
-                    TextWidget(
-                      text: "Score $score",
-                      color: const Color(0xFF6d3e00),
-                      fontsize: 30.sp,
-                      fontweight: true,
-                    ),
-                    TextWidget(
-                      text: "Time $timeLeft",
-                      color: const Color(0xFF6d3e00),
-                      fontsize: 30.sp,
-                      fontweight: true,
-                    )
-                  ],
-                ),
-                const SizedBox(height: 30),
-                TweenAnimationBuilder<double>(
-                  tween: Tween<double>(begin: 0.0, end: progress),
-                  duration: const Duration(milliseconds: 800),
-                  curve: Curves.easeInOut,
-                  builder: (context, value, child) {
-                    return ClipRRect(
-                      borderRadius: BorderRadius.circular(50),
-                      child: LinearProgressIndicator(
-                          value: value,
-                          minHeight: 15,
-                          valueColor: AlwaysStoppedAnimation<Color>(
-                            Color.lerp(const Color(0xFF74ad1e),
-                                const Color(0xFF74ad1e), value)!,
-                          ),
-                          backgroundColor: const Color(0xFFe0e0e0)),
-                    );
-                  },
-                ),
-              ],
-            )),
-        Positioned.fill(
-          child: Center(
-            child: Padding(
-              padding: EdgeInsets.only(
-                  top: MediaQuery.of(context).size.width > 800 ? 380 : 120,
-                  right: MediaQuery.of(context).size.width > 800 ? 150 : 0,
-                  left: MediaQuery.of(context).size.width > 800 ? 150 : 0),
-              child: AnimatedBuilder(
-                animation: _shakeController,
-                builder: (context, child) {
-                  final double shakeOffset =
-                      sin(_shakeController.value * 20) * 10;
-                  return Transform.translate(
-                    offset: Offset(shakeOffset, 0),
-                    child: child,
-                  );
-                },
-                child: Wrap(
-                  spacing: 8.0,
-                  runSpacing: 8.0,
-                  alignment: WrapAlignment.center,
-                  children: List.generate(
-                    duplicatedImages.length,
-                    (index) => GestureDetector(
-                      onTap: () {
-                        if (!revealedImages[index]) {
-                          _flipImage(index);
-                        }
-                      },
-                      child: SizedBox(
-                        width: MediaQuery.of(context).size.width > 800
-                            ? 80.w
-                            : 110.w,
-                        height: MediaQuery.of(context).size.width > 800
-                            ? 80.w
-                            : 110.w,
-                        child: AnimatedSwitcher(
-                          duration: const Duration(milliseconds: 500),
-                          transitionBuilder: (child, animation) {
-                            final flipAnimation =
-                                Tween(begin: pi, end: 0.0).animate(
-                              CurvedAnimation(
-                                parent: animation,
-                                curve: Curves.easeInOut,
-                              ),
-                            );
-
-                            return AnimatedBuilder(
-                              animation: flipAnimation,
-                              builder: (context, child) {
-                                final isFlipped = animation.value > 0.5;
-                                return Transform(
-                                  alignment: Alignment.center,
-                                  transform: Matrix4.identity()
-                                    ..setEntry(3, 2, 0.001)
-                                    ..rotateY(isFlipped
-                                        ? pi - flipAnimation.value
-                                        : flipAnimation.value),
-                                  child: Material(
-                                    elevation: isFlipped ? 4.0 : 2.0,
-                                    shadowColor: Colors.black54,
-                                    borderRadius: BorderRadius.circular(8),
-                                    child: child,
-                                  ),
-                                );
-                              },
-                              child: child,
-                            );
-                          },
-                          child: revealedImages[index]
-                              ? Image.asset(
-                                  duplicatedImages[index],
-                                  key: ValueKey<bool>(revealedImages[index]),
-                                )
-                              : Image.asset(
-                                  ImageAssets.questionMarkImage,
-                                  key: ValueKey<bool>(revealedImages[index]),
-                                ),
-                        ),
-                      ),
-                    ),
-                  ),
-                ),
-              ),
+      appBar: AppBar(
+        automaticallyImplyLeading: false,
+        backgroundColor: const Color(0xFF6d3e00),
+        title: TextWidget(
+            text: "Jurassic Pairs Dino",
+            color: Colors.white,
+            fontsize: 28.sp,
+            fontweight: true),
+      ),
+      body: Stack(
+        children: [
+          const BackgroundWidget(),
+          buildScoreBoard(),
+          buildTimer(),
+          buildTheMemoryCard()
+        ],
+      ),
+      bottomNavigationBar: BottomNavigationBar(
+        backgroundColor: const Color(0xFF6d3e00),
+        showSelectedLabels: false,
+        showUnselectedLabels: false,
+        type: BottomNavigationBarType.fixed,
+        onTap: (index) {
+          if (index == 0) {
+            _loadGameHistory();
+          } else if (index == 1) {
+            showExitGameDialog(context);
+          }
+          setState(() {});
+        },
+        items: const [
+          BottomNavigationBarItem(
+            icon: Icon(
+              Icons.history,
+              color: Colors.white,
+              size: 30,
             ),
+            label: "History",
           ),
-        ),
-        Align(
-          alignment: Alignment.bottomCenter,
+          BottomNavigationBarItem(
+            icon: Icon(
+              Icons.exit_to_app,
+              color: Colors.white,
+              size: 30,
+            ),
+            label: "Exit",
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget buildScoreBoard() {
+    return Container(
+      color: const Color(0xFF6d3e00),
+      width: double.infinity,
+      child: Padding(
+        padding: const EdgeInsets.all(8),
+        child: Card(
           child: Padding(
-            padding: const EdgeInsets.all(24),
+            padding: const EdgeInsets.all(8),
             child: Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
-                FloatingActionButton(
-                  onPressed: () {
-                    _loadGameHistory();
-                  },
-                  backgroundColor: const Color(0xFF6d3e00),
-                  child: const Icon(
-                    Icons.history,
-                    size: 40,
+                ExpandedWidget(
+                    text: "Game Win : $score",
                     color: Colors.white,
-                  ),
-                ),
-                ElevatedButton(
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: const Color(0xFF6d3e00),
-                  ),
-                  onPressed: () {
-                    Navigator.pop(context);
-                  },
-                  child: const Icon(
-                    Icons.exit_to_app,
-                    size: 40,
+                    fontSize: 19.sp,
+                    fontWeight: true),
+                ExpandedWidget(
+                    text: "Mode : ${widget.gameMode}",
                     color: Colors.white,
-                  ),
-                )
+                    fontSize: 19.sp,
+                    fontWeight: true),
+                ExpandedWidget(
+                    text:
+                        "Card Left : ${duplicatedImages.where((img) => img.isNotEmpty).length ~/ 2}",
+                    color: Colors.white,
+                    fontSize: 19.sp,
+                    fontWeight: true)
               ],
             ),
           ),
         ),
-      ]),
+      ),
+    );
+  }
+
+  Widget buildTimer() {
+    return Align(
+      alignment: Alignment.center,
+      child: Stack(
+        alignment: Alignment.center,
+        children: [
+          SizedBox(
+            width: 70,
+            height: 70,
+            child: ScoreProgressIndicator(
+              totalTime: totalTime,
+              timeLeft: timeLeft,
+            ),
+          ),
+          TextWidget(
+              text: "$timeLeft",
+              color: Colors.white,
+              fontsize: 24,
+              fontweight: true)
+        ],
+      ),
+    );
+  }
+
+  Widget buildTheMemoryCard() {
+    return Center(
+      child: LayoutBuilder(
+        builder: (context, constraints) {
+          final centerX = constraints.maxWidth / 2;
+          final centerY = constraints.maxHeight / 2;
+          const radius = 150.0;
+
+          return Stack(
+            children: List.generate(duplicatedImages.length, (index) {
+              final angle = (2 * pi / duplicatedImages.length) * index;
+              return Positioned(
+                left: centerX + radius * cos(angle) - 50,
+                top: centerY + radius * sin(angle) - 70,
+                child: GestureDetector(
+                  onTap: () {
+                    if (!revealedImages[index]) {
+                      _flipImage(index);
+                    }
+                  },
+                  child: SizedBox(
+                    width: 100,
+                    height: 140,
+                    child: AnimatedSwitcher(
+                      duration: const Duration(milliseconds: 500),
+                      transitionBuilder: (child, animation) {
+                        return ScaleTransition(
+                          scale: animation,
+                          child: child,
+                        );
+                      },
+                      child: revealedImages[index]
+                          ? (duplicatedImages[index].isNotEmpty
+                              ? Image.asset(
+                                  duplicatedImages[index],
+                                  key: ValueKey(revealedImages[index]),
+                                )
+                              : Container())
+                          : Image.asset(
+                              ImageAssets.questionMarkImage,
+                              key: ValueKey(revealedImages[index]),
+                            ),
+                    ),
+                  ),
+                ),
+              );
+            }),
+          );
+        },
+      ),
     );
   }
 }
